@@ -1,0 +1,711 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Colors - BrickWorks Admin{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Main Content */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .main-content {
+        margin-left: 100px;
+        flex: 1;
+        padding-top: 1rem;
+        padding-left: 3rem;
+    }
+
+    .content-header {
+        padding: 2rem 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .content-header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        background: #fff;
+        border: none;
+        border-radius: 8px;
+        color: #000;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary {
+        background: #2a2a2a;
+        color: #fff;
+        border: 1px solid #3a3a3a;
+    }
+
+    .btn-secondary:hover {
+        background: #333;
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Content Body */
+
+
+    .search-controls {
+        display: flex;
+        margin-bottom: 1.5rem;
+        align-items: space-between;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+
+    .search-box {
+
+        /* increased width */
+        min-width: 400px;
+        max-width: 100%;
+        width: 100%;
+
+        padding: 0.875rem 1rem;
+        padding-left: 2.75rem;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        color: #e5e5e5;
+        font-size: 0.95rem;
+        position: relative;
+    }
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+    }
+
+    .search-box:focus {
+        outline: none;
+        border-color: #444;
+        background: #222;
+    }
+
+    .download-btn {
+        padding: 0.75rem;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        color: #888;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+    }
+
+    .download-btn:hover {
+        background: #222;
+        color: #fff;
+    }
+
+    /* Table */
+    .table-container {
+        background: #141414;
+        border: 1px solid #2a2a2a;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        background: #1a1a1a;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    th {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-weight: 500;
+        color: #888;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #1a1a1a;
+        color: #e5e5e5;
+        font-size: 0.95rem;
+    }
+
+    tbody tr {
+        transition: background 0.2s ease;
+    }
+
+    tbody tr:hover {
+        background: #1a1a1a;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .color-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .color-dot {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #2a2a2a;
+        flex-shrink: 0;
+    }
+
+    .edit-link {
+        color: #6b7cff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .edit-link:hover {
+        color: #8b9cff;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #1a1a1a;
+        padding: 2rem;
+        border-radius: 16px;
+        border: 1px solid #2a2a2a;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .modal-header h2 {
+        color: #fff;
+        font-size: 1.5rem;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 1.5rem;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .close-btn:hover {
+        background: #2a2a2a;
+        color: #fff;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #888;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: #0a0a0a;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        color: #e5e5e5;
+        font-size: 0.95rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #444;
+        background: #111;
+    }
+
+    .color-preview {
+        width: 100%;
+        height: 60px;
+        border-radius: 8px;
+        border: 2px solid #2a2a2a;
+        margin-top: 0.5rem;
+    }
+
+    /* Toast */
+    .toast {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        background: #fff;
+        color: #000;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        font-weight: 500;
+        z-index: 2000;
+        animation: slideIn 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .toast.error {
+        background: #ff3366;
+        color: #fff;
+    }
+
+    .toast.success {
+        background: #00d084;
+        color: #fff;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0a0a0a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #2a2a2a;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #3a3a3a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <header class="content-header">
+        <h1 id="pageTitle">Colors</h1>
+        <div class="header-actions">
+            <button class="btn" onclick="openAddModal()">
+                <i class="fas fa-plus"></i>
+                Add New Color
+            </button>
+        </div>
+    </header>
+
+    <div class="content-body">
+        <div class="search-controls">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-box" id="searchBox" placeholder="Search colors"
+                    onkeyup="filterTable()">
+            </div>
+
+        </div>
+
+
+
+        <div class="search-controls">
+
+            <button class="download-btn" onclick="exportData()" title="Export">
+                <i class="fas fa-download"></i>
+            </button>
+            <div class="search-controls" >
+                <button class="btn-secondary btn" onclick="exportData()">
+                     <i class="fas fa-file-export"></i>
+                    Export
+                </button>
+
+                <button class="btn-secondary btn" onclick="loadTable()" style="margin-left: 10px;">
+                    <i class="fas fa-sync"></i>
+                    Refresh
+                </button>
+            </div>
+
+        </div>
+
+
+        <div class="table-container">
+            <div id="tableWrapper">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Row</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="editForm"></div>
+        <button class="btn" onclick="saveEdit()" style="width: 100%; margin-top: 1rem;">
+            <i class="fas fa-save"></i>
+            Save Changes
+        </button>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal" id="addModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="addModalTitle">Add Color</h2>
+            <button class="close-btn" onclick="closeAddModal()">&times;</button>
+        </div>
+        <div id="addForm"></div>
+        <button class="btn" onclick="saveNew()" style="width: 100%; margin-top: 1rem;">
+            <i class="fas fa-plus"></i>
+            Add Row
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let currentColumns = [
+        { 'name': 'color_id', 'type': 'number' },
+        { 'name': 'color_name', 'type': 'string' },
+        { 'name': 'color_type', 'type': 'string' },
+        { 'name': 'color_code', 'type': 'string' },
+    ];
+
+    // Update the existing JavaScript in your template
+    let currentData = [];
+
+    let currentPrimaryKey = 'id';
+    let currentPage = 1;
+    let currentSearch = '';
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        loadTable();
+    });
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i> ${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    async function loadTable(page = 1) {
+        const wrapper = document.getElementById('tableWrapper');
+        wrapper.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
+        try {
+            // Build query parameters
+            const params = new URLSearchParams({
+                page: page,
+                page_size: 20
+            });
+
+            if (currentSearch) {
+                params.append('search', currentSearch);
+            }
+
+            const response = await fetch(`/api/v1/color/?${params}`);
+            const result = await response.json();
+
+            if (result.success) {
+                currentData = result.data || [];
+                currentPage = page;
+
+                if (currentData.length === 0) {
+                    wrapper.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>${currentSearch ? 'No color found matching your search' : 'No colors available'}</p>
+                        ${currentSearch ? '<button class="btn-secondary btn" onclick="clearSearch()" style="margin-top: 1rem;">Clear Search</button>' : ''}
+                    </div>
+                `;
+                    return;
+                }
+
+                renderTable();
+                updatePagination(result.pagination);
+                showToast(`Loaded ${currentData.length} colors${currentSearch ? ' for "' + currentSearch + '"' : ''}`);
+            } else {
+                throw new Error(result.error || 'Failed to load colors');
+            }
+
+        } catch (error) {
+            console.error('Error loading colors:', error);
+            wrapper.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading colors</p></div>';
+            showToast('Failed to load colors', 'error');
+        }
+    }
+
+    function renderTable() {
+
+
+        const wrapper = document.getElementById('tableWrapper');
+
+        let tableHTML = `
+        <table>
+            <thead>
+                <tr>
+    `;
+
+        // Create table headers
+        currentColumns.forEach(column => {
+            tableHTML += `<th>${column.name.replace('_', ' ').toUpperCase()}</th>`;
+        });
+
+        tableHTML += `<th>ACTIONS</th></tr></thead><tbody>`;
+
+        // Create table rows
+        currentData.forEach(row => {
+            tableHTML += `<tr>`;
+            currentColumns.forEach(column => {
+                const value = row[column.name] || '';
+                if (column.name === 'name') {
+                    tableHTML += `<td><strong>${escapeHtml(value)}</strong></td>`;
+                } else {
+                    tableHTML += `<td>${escapeHtml(value)}</td>`;
+                }
+            });
+
+            tableHTML += `
+            <td>
+                <a href="#" class="edit-link" onclick="editRow(${row[currentPrimaryKey]})">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </td>
+        </tr>`;
+        });
+
+        tableHTML += `</tbody></table>`;
+        wrapper.innerHTML = tableHTML;
+    }
+
+    function filterTable() {
+        const searchBox = document.getElementById('searchBox');
+        currentSearch = searchBox.value.trim();
+
+        // Debounce search - wait 500ms after user stops typing
+        clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(() => {
+            loadTable(1); // Reset to first page when searching
+        }, 500);
+    }
+
+    function clearSearch() {
+        const searchBox = document.getElementById('searchBox');
+        searchBox.value = '';
+        currentSearch = '';
+        loadTable(1);
+    }
+
+    function updatePagination(pagination) {
+        // Remove existing pagination if any
+        const existingPagination = document.getElementById('pagination');
+        if (existingPagination) {
+            existingPagination.remove();
+        }
+
+        if (pagination.total_pages <= 1) return;
+
+        const paginationHTML = `
+        <div id="pagination" class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; padding: 1rem; color: #888;">
+            <button class="btn-secondary btn" onclick="loadTable(${pagination.current_page - 1})" ${!pagination.has_previous ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            
+            <span>Page ${pagination.current_page} of ${pagination.total_pages}</span>
+            <span>(${pagination.total_count} total colors)</span>
+            
+            <button class="btn-secondary btn" onclick="loadTable(${pagination.current_page + 1})" ${!pagination.has_next ? 'disabled' : ''}>
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    `;
+
+        document.querySelector('.table-container').insertAdjacentHTML('afterend', paginationHTML);
+    }
+
+    function escapeHtml(unsafe) {
+        if (unsafe === null || unsafe === undefined) return '';
+        return unsafe.toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Add these styles to your CSS
+    const paginationStyles = `
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding: 1rem;
+        color: #888;
+    }
+    
+    .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .pagination button:disabled:hover {
+        transform: none;
+        box-shadow: none;
+    }
+`;
+
+    // Add styles to head
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = paginationStyles;
+    document.head.appendChild(styleSheet);
+
+    // Placeholder functions for modal operations
+    function editRow(id) {
+        showToast('Edit functionality coming soon!', 'success');
+    }
+
+    function openAddModal() {
+        showToast('Add category functionality coming soon!', 'success');
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
+
+    function closeAddModal() {
+        document.getElementById('addModal').classList.remove('active');
+    }
+
+    function exportData() {
+       showToast(`Exporting Color...`);
+
+        axios.post(`/api/v1/export/color/`)
+            .then(res => {
+                showToast(`✓ Exported successfully.`);
+                console.log('Export data:', res.data.status);
+            })
+            .catch(err => {
+                console.error('Error exporting:', err);
+                showToast(`✗ Failed to export ${config.exportName}`);
+            });
+    }
+</script>
+{% endblock %}
