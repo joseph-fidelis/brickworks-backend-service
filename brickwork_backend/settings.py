@@ -38,8 +38,8 @@ ALLOWED_HOSTS = ["*", "https://brickworkbackendweb-production.up.railway.app"]
 
 CSRF_TRUSTED_ORIGINS = ["https://brickworkbackendweb-production.up.railway.app"]
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+# CELERY_BROKER_URL = "redis://localhost:6379/0"
+# CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 
 # CELERY_BROKER_URL = "redis://default:NkrCESXXeWEaRTnMULCXAGMzwmCzhOBO@shortline.proxy.rlwy.net:14917"
@@ -104,35 +104,35 @@ WSGI_APPLICATION = "brickwork_backend.wsgi.application"
 # }
 
 # settings.py
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     },
-#     'brick_works': {  # Your specific database
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'brick_works.db',  # Your .db file
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'brick_works': {  # Your specific database
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'brick_works.db',  # Your .db file
+    }
+}
 # postgresql://postgres:WjjcnJGpPciOxUvIagSeDZarnkgDhQqz@yamanote.proxy.rlwy.net:18961/railway
 # DATABASES = {
 #     'default': dj_database_url.parse("postgresql://alpha_trade_user:91XO3T8NOd60sPeyPtDQitHMwDpVZNPL@dpg-ct0um5btq21c73ejdtt0-a.oregon-postgres.render.com/alpha_trade")
 # }
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "zYgTABBA",
-        "USER": "uTvdPCAsJ2wUqwAYDE6b",
-        "PASSWORD": "HhXwsRg4+WHuC-@:1.wqfxCZKK1Tb-nad!WLjpiwkj^D+w",
-        "HOST": "localhost",
-        "PORT": "5432",
-    },
-    "brick_works": {  # Your specific database
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "brick_works.db",  # Your .db file
-    },
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "zYgTABBA",
+#         "USER": "uTvdPCAsJ2wUqwAYDE6b",
+#         "PASSWORD": "HhXwsRg4+WHuC-@:1.wqfxCZKK1Tb-nad!WLjpiwkj^D+w",
+#         "HOST": "localhost",
+#         "PORT": "5432",
+#     },
+#     "brick_works": {  # Your specific database
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "brick_works.db",  # Your .db file
+#     },
+# }
 # https://github.com/DANIEL-EKWERE/brickwork_backend_web.git
 
 # Password validation

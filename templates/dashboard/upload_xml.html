@@ -174,6 +174,7 @@
       position: fixed;
       bottom: 2rem;
       right: 2rem;
+      height: 50px;
       padding: 1rem 1.5rem;
       background: rgba(255, 255, 255, 0.95);
       color: #000;
@@ -326,9 +327,24 @@
 
 {% block extra_scripts %}
 <script>
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    
+    window.handleFileSelect = function(type, input) {
+      const file = input.files[0];
+      if (!file) return;
 
+      const info = document.getElementById(`info-${type}`);
+      const dropZone = document.getElementById(`drop-${type}`);
+      
+      info.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      info.classList.add('success');
+      
+      uploadFile(type, file);
+    };
 
-     // Get CSRF token from Django cookie
+    // Get CSRF token from Django cookie
     function getCookie(name) {
       let cookieValue = null;
       if (document.cookie && document.cookie !== "") {
@@ -345,7 +361,13 @@
     }
 
     const csrftoken = getCookie("csrftoken");
-    axios.defaults.headers.common["X-CSRFToken"] = csrftoken;
+    
+    // Check if axios is available
+    if (typeof axios !== 'undefined') {
+      axios.defaults.headers.common["X-CSRFToken"] = csrftoken;
+    } else {
+      console.error('Axios is not loaded!');
+    }
 
     const fileTypes = ['color', 'category', 'parts', 'minifigure', 'gears', 'codes'];
 
@@ -354,37 +376,26 @@
       const dropZone = document.getElementById(`drop-${type}`);
       const fileInput = document.getElementById(`${type}-file`);
 
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-      });
+      if (dropZone && fileInput) {
+        dropZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dropZone.classList.add('dragover');
+        });
 
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('dragover');
-      });
+        dropZone.addEventListener('dragleave', () => {
+          dropZone.classList.remove('dragover');
+        });
 
-      dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) {
-          fileInput.files = e.dataTransfer.files;
-          handleFileSelect(type, fileInput);
-        }
-      });
+        dropZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('dragover');
+          if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelect(type, fileInput);
+          }
+        });
+      }
     });
-
-    function handleFileSelect(type, input) {
-      const file = input.files[0];
-      if (!file) return;
-
-      const info = document.getElementById(`info-${type}`);
-      const dropZone = document.getElementById(`drop-${type}`);
-      
-      info.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-      info.classList.add('success');
-      
-      uploadFile(type, file);
-    }
 
     async function uploadFile(type, file) {
       const progressContainer = document.getElementById(`progress-${type}`);
@@ -417,19 +428,43 @@
       }
     }
 
-    function processAllXML() {
-      showToast('Processing all XML files...');
-      // Add your processing logic here
+    
+    window.processAllXML = function() {
+      showToast('Inserting all XML files...');
       axios.post('{% url "initialise_data" %}')
-  .then(res => {
-    showToast(`✓ Initialization successfully.`);
-    console.log('Export data:', res.data.status);
-  })
-  .catch(err => {
-    console.error('Error Processing Data:', err);
-    showToast(`✗ Error Processing Data ${err}`, true);
-  });
-    }
+        .then(res => {
+          showToast(`✓ Data inserted into db successfully.`);
+          console.log('Data inserted into db:', res.data.status);
+        })
+        .catch(err => {
+          console.error('Error Processing Data:', err);
+          showToast(`✗ Error Processing Data ${err}`, true);
+        });
+    };
+
+    window.exportAllXML = async function() {
+      try {
+        showToast('Step 1: Exporting to color...');
+        await axios.post('/dashboard/export/color/', {}, { timeout: 600000 });
+
+        showToast('Step 2: Exporting to gears...');
+        await axios.post('/dashboard/export/gears/', {}, { timeout: 600000 });
+
+        showToast('Step 3: Exporting to categories...');
+        await axios.post('/dashboard/export/category/', {}, { timeout: 600000 });
+
+        showToast('Step 4: Exporting to parts...');
+        await axios.post('/dashboard/export/parts/', {}, { timeout: 600000 });
+
+        showToast('Step 5: Exporting to minifigures...');
+        await axios.post('/dashboard/export/minifigures/', {}, { timeout: 600000 });
+
+        showToast('✓ Export completed successfully.');
+      } catch (err) {
+        console.error('Error Processing Data:', err);
+        showToast(`✗ Error Processing Data: ${err.message}`, true);
+      }
+    };
 
     function showToast(message, isError = false) {
       const toast = document.getElementById('toast');
@@ -437,5 +472,10 @@
       toast.className = `toast ${isError ? 'error' : ''} show`;
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
-  </script>
+
+    
+    window.uploadFile = uploadFile;
+    window.showToast = showToast;
+  });
+</script>
 {% endblock %}
